@@ -5,7 +5,8 @@ This package enables the automatic disassembly of LLVM bitcode inside
 Emacs buffers, when opening LLVM bitcode (.bc) files.
 
 When `llvm-mode` is available, it is automatically selected for the
-current LLVM bitcode-containing buffer.
+current LLVM bitcode-containing buffer. You can download `llvm-mode`
+from [here](http://llvm.org/svn/llvm-project/llvm/trunk/utils/emacs/llvm-mode.el).
 
 In any case, `llvm-dis` must be installed in the system for this
 extension to have any effect, since that is the tool that actually
