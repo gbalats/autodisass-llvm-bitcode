@@ -88,43 +88,35 @@ inside a jar archive, during auto-extraction."
 ;; LLVM bitcode handlers
 ;;------------------------------
 
-(defun autodisass-llvm-handler (op &rest args)
+(defun autodisass-llvm-handler (operation &rest args)
   "Handle .bc files by putting the output of `llvm-dis' in the buffer.
 
-OP is the name of the I/O primitive to be handled; ARGS are the
-arguments that were passed to that primitive.  This function only
-applies to `get-file-buffer' operations."
-  (cond
-   ((and (eq op 'get-file-buffer) (executable-find "llvm-dis"))
-     (let* ((bc-file     (car args))
-            (buffer-name (file-name-nondirectory bc-file)))
-
-       ;; Create new buffer to hold the output of `llvm-dis'
-       (with-current-buffer (generate-new-buffer buffer-name)
-
-         ;; Disassemble bitcode inside buffer
-         (autodisass-bitcode-buffer bc-file)
-
-         ;; Display some info on what just happened
-         (message "Disassembled %s" bc-file)
-
-         ;; Return current buffer
-         (current-buffer))))
-
-   ((autodisass-llvm--default-handler op args))))
-
-
-(defun autodisass-llvm--default-handler (operation args)
-  "Run the real handler to avoid automatic disassembly.
-
 OPERATION is the name of the I/O primitive to be handled; ARGS
-are the arguments that were passed to that primitive."
-  (let ((inhibit-file-name-handlers
-         (cons 'autodisass-llvm-handler
-               (and (eq inhibit-file-name-operation operation)
-                    inhibit-file-name-handlers)))
-        (inhibit-file-name-operation operation))
-    (apply operation args)))
+are the arguments that were passed to that primitive.  This
+function only applies to `get-file-buffer' operations."
+  (cond ((and (eq operation 'get-file-buffer)
+              (executable-find "llvm-dis")
+              (y-or-n-p "Disassemble this file using llvm-dis? "))
+         (let* ((bc-file     (car args))
+                (buffer-name (file-name-nondirectory bc-file)))
+
+           ;; Create new buffer to hold the output of `llvm-dis'
+           (with-current-buffer (generate-new-buffer buffer-name)
+
+             ;; Disassemble bitcode inside buffer
+             (autodisass-bitcode-buffer bc-file)
+
+             ;; Display some info on what just happened
+             (message "Disassembled %s" bc-file)
+
+             ;; Return current buffer
+             (current-buffer))))
+        (t (let ((inhibit-file-name-handlers
+                  (cons 'autodisass-llvm-handler
+                        (and (eq inhibit-file-name-operation operation)
+                             inhibit-file-name-handlers)))
+                 (inhibit-file-name-operation operation))
+             (apply operation args)))))
 
 
 (provide 'autodisass-llvm-bitcode)
