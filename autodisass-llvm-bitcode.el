@@ -35,88 +35,89 @@
 ;;
 ;; In any case, `llvm-dis' must be installed in the system for this
 ;; extension to have any effect, since that is the tool that actually
-;; performs the disassembly.
+;; performs the disassembly.  If not, you will have to customize the
+;; variable `ad-llvm-bitcode-disassembler' to point to another
+;; disassembler command.
 
 ;;; Code:
 
 
-;; Add handlers for automatically disassembling .class files
-(add-to-list 'file-name-handler-alist
-             '("\\.bc$" . autodisass-llvm-handler))
+(defconst autodisass-llvm-bitcode-version "0.1")
+
+(defgroup autodisass-llvm-bitcode nil
+  "Automatic disassembly of LLVM bitcode."
+  :tag    "LLVM Bitcode Disassembly"
+  :prefix "ad-llvm-bitcode-"
+  :group  'autodisass)
 
 
-;;------------------------------
-;; LLVM Bitcode Disassembly
-;;------------------------------
+(defconst ad-llvm-bitcode-regexp "\\.bc$"
+  "Regular expressions that matches LLVM bitcode files.")
 
-(defun autodisass-bitcode-buffer (file &optional jar-file)
-  "Disassembles an LLVM Bitcode FILE inside the current buffer, using `javap'.
 
-The JAR-FILE argument is non-nil if the disassembly is happening
-inside a jar archive, during auto-extraction."
+(defcustom ad-llvm-bitcode-disassembler "llvm-dis"
+  "Return the name of the disassembler command.
+If the command is not on your path, you may specify a fully
+qualified path to it.  The command should support the -o option
+for specifying an output file name, and should accept the input
+file name as its last argument."
+  :tag "Disassembler command"
+  :group 'autodisass-llvm-bitcode
+  :type 'string)
 
+
+(defcustom ad-llvm-bitcode-parameters '("-show-annotations")
+  "Extra parameters for the disassembler process."
+  :tag "Command line options"
+  :group 'autodisass-llvm-bitcode
+  :type '(repeat string))
+
+
+(defun ad-llvm-bitcode-make-temp-file (file)
+  "Return a temporary file name for bitcode disassembly.
+This will be where the disassembled contents of the bitcode FILE
+will be placed."
   (let* ((filename  (file-name-nondirectory file))
          (basename  (file-name-sans-extension filename))
          (temp-file (make-temp-file basename nil ".ll")))
+    temp-file))
 
-    ;; Disassemble .bc file
-    (call-process "llvm-dis" nil t nil
-                  "-o" temp-file file)
 
+(defun ad-llvm-bitcode-buffer (file)
+  "Disassembles an LLVM Bitcode FILE inside the current buffer."
+  (let ((temp-file (ad-llvm-bitcode-make-temp-file file)))
+    ;; Print start of disassembly message
+    (message "Disassembling %s" file)
+    ;; Call disassembler and place contents in temp file
+    (apply 'call-process ad-llvm-bitcode-disassembler
+           nil t nil (append ad-llvm-bitcode-parameters
+                             (list "-o" temp-file file)))
     ;; Read contents of `temp-file' and then delete it
-    (insert-file-contents temp-file)
+    (insert-file-contents temp-file nil nil nil t)
     (delete-file temp-file)
-
-    ;; Set buffer's filename
-    (setq buffer-file-name file)
-
-    ;; Set read-only mode for this buffer
+    ;; Mark as read-only and unmodified
     (setq buffer-read-only t)
-
-    ;; Mark the buffer as unmodified
     (set-buffer-modified-p nil)
-
-    ;; Jump to the beginning of the buffer
-    (goto-char (point-min))
-
     ;; Switch to `llvm-mode'
     (when (fboundp 'llvm-mode)
-      (llvm-mode))))
+      (llvm-mode))
+    ;; Print success message
+    (message "Disassembled %s" file)))
 
 
-;;------------------------------
-;; LLVM bitcode handlers
-;;------------------------------
+(defun ad-llvm-bitcode-disassemble-p ()
+  "Return t if automatic disassembly should be performed."
+  (let ((file (buffer-file-name)))
+    (and (string-match ad-llvm-bitcode-regexp file)
+         (executable-find ad-llvm-bitcode-disassembler)
+         (y-or-n-p (format "Disassemble %s using %s? " file
+                           ad-llvm-bitcode-disassembler)))))
 
-(defun autodisass-llvm-handler (operation &rest args)
-  "Handle .bc files by putting the output of `llvm-dis' in the buffer.
 
-OPERATION is the name of the I/O primitive to be handled; ARGS
-are the arguments that were passed to that primitive.  This
-function only applies to `get-file-buffer' operations."
-  (cond ((and (eq operation 'get-file-buffer)
-              (executable-find "llvm-dis")
-              (y-or-n-p "Disassemble this file using llvm-dis? "))
-         (let* ((bc-file     (car args))
-                (buffer-name (file-name-nondirectory bc-file)))
-
-           ;; Create new buffer to hold the output of `llvm-dis'
-           (with-current-buffer (generate-new-buffer buffer-name)
-
-             ;; Disassemble bitcode inside buffer
-             (autodisass-bitcode-buffer bc-file)
-
-             ;; Display some info on what just happened
-             (message "Disassembled %s" bc-file)
-
-             ;; Return current buffer
-             (current-buffer))))
-        (t (let ((inhibit-file-name-handlers
-                  (cons 'autodisass-llvm-handler
-                        (and (eq inhibit-file-name-operation operation)
-                             inhibit-file-name-handlers)))
-                 (inhibit-file-name-operation operation))
-             (apply operation args)))))
+;; Add hook for automatic disassembly
+(add-hook 'find-file-hooks
+          (lambda () (when (ad-llvm-bitcode-disassemble-p)
+                       (ad-llvm-bitcode-buffer (buffer-file-name)))))
 
 
 (provide 'autodisass-llvm-bitcode)
