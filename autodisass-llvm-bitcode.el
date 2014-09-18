@@ -1,4 +1,4 @@
-;;; autodisass-llvm-bitcode --- Automatically disassemble LLVM bitcode
+;;; autodisass-llvm-bitcode.el --- Automatically disassemble LLVM bitcode
 
 ;; Copyright (C) 2014, George Balatsouras
 ;;
@@ -128,4 +128,4 @@ will be placed."
 
 (provide 'autodisass-llvm-bitcode)
 
-;;; autodisass-llvm-bitcode ends here
+;;; autodisass-llvm-bitcode.el ends here
