@@ -1,5 +1,6 @@
 [![License GPL 3][badge-license]](http://www.gnu.org/licenses/gpl-3.0.txt)
 [![MELPA][melpa-badge]][melpa-package]
+[![MELPA Stable][melpa-stable-badge]][melpa-stable-package]
 
 autodisass-llvm-bitcode
 =======================
@@ -19,8 +20,8 @@ performs the disassembly.
 ## Installation
 
 You can install this package using the `package.el` built-in package
-manager in Emacs. It is available on the [MELPA](http://melpa.org/#/)
-repo.
+manager in Emacs. It is available on [MELPA](http://melpa.org/#/) and
+[MELPA Stable](http://stable.melpa.org/#/) repos.
 
 If you have these enabled, simply run:
 
@@ -35,4 +36,6 @@ Alternatively, you can save
 
 [badge-license]: https://img.shields.io/badge/license-GPL_3-green.svg
 [melpa-badge]: http://melpa.org/packages/autodisass-llvm-bitcode-badge.svg
+[melpa-stable-badge]: http://stable.melpa.org/packages/autodisass-llvm-bitcode-badge.svg
 [melpa-package]: http://melpa.org/#/autodisass-llvm-bitcode
+[melpa-stable-package]: http://stable.melpa.org/#/autodisass-llvm-bitcode
