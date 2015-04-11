@@ -5,6 +5,7 @@
 ;; Author: George Balatsouras <gbalats(at)gmail(dot)com>
 ;; Maintainer: George Balatsouras <gbalats(at)gmail(dot)com>
 ;; Created: 26 Aug 2014
+;; Version: 1.0
 ;; Keywords: convenience, data, files
 ;;
 ;;
@@ -46,7 +47,7 @@
 ;;; Code:
 
 
-(defconst autodisass-llvm-bitcode-version "0.1")
+(defconst autodisass-llvm-bitcode-version "1.0")
 
 (defgroup autodisass-llvm-bitcode nil
   "Automatic disassembly of LLVM bitcode."
