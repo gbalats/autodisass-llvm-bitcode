@@ -1,3 +1,6 @@
+[![License GPL 3][badge-license]](http://www.gnu.org/licenses/gpl-3.0.txt)
+[![MELPA][melpa-badge]][melpa-package]
+
 autodisass-llvm-bitcode
 =======================
 
@@ -13,7 +16,23 @@ extension to have any effect, since that is the tool that actually
 performs the disassembly.
 
 
-To use, save [this .el file](autodisass-llvm-bitcode.el) to a
-directory in your *load-path*, and add the following to your `.emacs`:
+## Installation
+
+You can install this package using the `package.el` built-in package
+manager in Emacs. It is available on the [MELPA](http://melpa.org/#/)
+repo.
+
+If you have these enabled, simply run:
+
+    M-x package-install [RET] autodisass-llvm-bitcode [RET]
+
+
+Alternatively, you can save
+[this .el file](autodisass-llvm-bitcode.el) to a directory in your
+*load-path*, and add the following to your `.emacs`:
 
     (require 'autodisass-llvm-bitcode)
+
+[badge-license]: https://img.shields.io/badge/license-GPL_3-green.svg
+[melpa-badge]: http://melpa.org/packages/autodisass-llvm-bitcode-badge.svg
+[melpa-package]: http://melpa.org/#/autodisass-llvm-bitcode
