@@ -2,3 +2,4 @@
 
 /.cask/
 /dist/
+/llvm-mode.el

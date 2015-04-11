@@ -18,8 +18,8 @@ deps: | $(project_pkgdir)
 compile: deps
 	$(CASK) build
 
-run:
-	$(CASKED_EMACS) -Q -l $(project).el
+run: | llvm-mode.el
+	$(CASKED_EMACS) -Q -l $(project).el -l llvm-mode.el
 
 
 # Cleaning targets
@@ -54,3 +54,13 @@ $(project)-pkg.el: $(project).el Cask
 
 $(project_pkgdir):
 	$(CASK) install
+
+
+#----------------------------------------
+# Vendor LLVM Mode for Emacs
+#----------------------------------------
+
+llvm.url := http://llvm.org/svn/llvm-project/llvm/trunk/utils/emacs
+
+llvm-mode.el:
+	curl -O -s $(llvm.url)/$@
