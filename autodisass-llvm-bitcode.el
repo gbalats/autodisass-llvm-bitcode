@@ -5,7 +5,7 @@
 ;; Author: George Balatsouras <gbalats(at)gmail(dot)com>
 ;; Maintainer: George Balatsouras <gbalats(at)gmail(dot)com>
 ;; Created: 26 Aug 2014
-;; Version: 1.0
+;; Version: 1.1
 ;; Keywords: convenience, data, files
 ;;
 ;;
@@ -47,7 +47,7 @@
 ;;; Code:
 
 
-(defconst autodisass-llvm-bitcode-version "1.0")
+(defconst autodisass-llvm-bitcode-version "1.1")
 
 (defgroup autodisass-llvm-bitcode nil
   "Automatic disassembly of LLVM bitcode."
@@ -89,8 +89,14 @@ will be placed."
 
 
 (defun ad-llvm-bitcode-buffer (file)
-  "Disassembles an LLVM Bitcode FILE inside the current buffer."
-  (let ((temp-file (ad-llvm-bitcode-make-temp-file file)))
+  "Disassembles an LLVM Bitcode FILE inside a new buffer."
+  (let ((temp-file (ad-llvm-bitcode-make-temp-file file))
+        (orig-buffer-name      (buffer-name))
+        (orig-buffer-file-name (buffer-file-name)))
+    ;; kill previous buffer
+    (kill-buffer orig-buffer-name)
+    ;; create and select new buffer with disassembled contents
+    (switch-to-buffer (generate-new-buffer orig-buffer-name))
     ;; Print start of disassembly message
     (message "Disassembling %s" file)
     ;; Call disassembler and place contents in temp file
@@ -100,9 +106,12 @@ will be placed."
     ;; Read contents of `temp-file' and then delete it
     (insert-file-contents temp-file nil nil nil t)
     (delete-file temp-file)
-    ;; Mark as read-only and unmodified
-    (setq buffer-read-only t)
-    (set-buffer-modified-p nil)
+    ;; set some properties
+    (set-visited-file-name nil)
+    (setq buffer-file-name orig-buffer-file-name)
+    (setq buffer-read-only t)           ; mark as unmodified
+    (set-buffer-modified-p nil)         ; mark as read-only
+    (goto-char (point-min))             ; jump to top
     ;; Switch to `llvm-mode'
     (when (fboundp 'llvm-mode)
       (llvm-mode))
