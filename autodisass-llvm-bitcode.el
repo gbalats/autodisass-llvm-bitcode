@@ -109,19 +109,19 @@ will be placed."
     (message "Disassembled %s" file)))
 
 
-(defun ad-llvm-bitcode-disassemble-p ()
-  "Return t if automatic disassembly should be performed."
-  (let ((file (buffer-file-name)))
-    (and (string-match ad-llvm-bitcode-regexp file)
-         (executable-find ad-llvm-bitcode-disassembler)
-         (y-or-n-p (format "Disassemble %s using %s? " file
-                           ad-llvm-bitcode-disassembler)))))
+(defun ad-llvm-bitcode-disassemble-p (file)
+  "Return t if automatic disassembly should be performed for FILE."
+  (and (string-match ad-llvm-bitcode-regexp file)
+       (executable-find ad-llvm-bitcode-disassembler)
+       (y-or-n-p (format "Disassemble %s using %s? " file
+                         ad-llvm-bitcode-disassembler))))
 
 
 ;; Add hook for automatic disassembly
 (add-hook 'find-file-hooks
-          (lambda () (when (ad-llvm-bitcode-disassemble-p)
-                       (ad-llvm-bitcode-buffer (buffer-file-name)))))
+          (lambda () (let ((class-file (buffer-file-name)))
+                       (when (ad-llvm-bitcode-disassemble-p class-file)
+                         (ad-llvm-bitcode-buffer class-file)))))
 
 
 (provide 'autodisass-llvm-bitcode)
