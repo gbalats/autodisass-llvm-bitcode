@@ -92,11 +92,13 @@ will be placed."
   "Disassembles an LLVM Bitcode FILE inside a new buffer."
   (let ((temp-file (ad-llvm-bitcode-make-temp-file file))
         (orig-buffer-name      (buffer-name))
-        (orig-buffer-file-name (buffer-file-name)))
+        (orig-buffer-file-name (buffer-file-name))
+	)
     ;; kill previous buffer
     (kill-buffer orig-buffer-name)
     ;; create and select new buffer with disassembled contents
     (switch-to-buffer (generate-new-buffer orig-buffer-name))
+    (setq default-directory (file-name-directory orig-buffer-file-name))
     ;; Print start of disassembly message
     (message "Disassembling %s" file)
     ;; Call disassembler and place contents in temp file
